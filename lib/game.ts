@@ -30,11 +30,14 @@ export const CREW_CARDS: CrewCard[] = [
   { id: "deckhand", name: "갑판원", cost: 1, stats: { deck: 2 }, image: "/images/crew/deckhand.png" },
   { id: "boatswain", name: "갑판장", cost: 2, stats: { deck: 4 }, image: "/images/crew/boatswain.png" },
   { id: "engine-rating", name: "기관원", cost: 1, stats: { engine: 2 }, image: "/images/crew/engine-rating.png" },
-  { id: "chief-engineer", name: "기관장", cost: 3, stats: { engine: 6 }, image: "/images/crew/chief-engineer.png" },
-  { id: "third-officer", name: "3항기사", cost: 2, stats: { navigation: 2, deck: 1 }, image: "/images/crew/third-officer.png" },
-  { id: "second-officer", name: "2항기사", cost: 3, stats: { navigation: 5 }, image: "/images/crew/second-officer.png" },
-  { id: "chief-officer", name: "1항기사", cost: 4, stats: { deck: 4, navigation: 3 }, image: "/images/crew/chief-officer.png" },
-  { id: "master-chief", name: "선기장", cost: 5, stats: { deck: 4, engine: 4, navigation: 4 }, image: "/images/crew/master-chief.png" },
+  { id: "third-officer", name: "3항사", cost: 2, stats: { navigation: 2, deck: 1 }, image: "/images/crew/third-officer.png" },
+  { id: "third-engineer", name: "3기사", cost: 2, stats: { engine: 3 }, image: "/images/crew/third-engineer.png" },
+  { id: "second-officer", name: "2항사", cost: 3, stats: { navigation: 5 }, image: "/images/crew/second-officer.png" },
+  { id: "second-engineer", name: "2기사", cost: 3, stats: { engine: 5 }, image: "/images/crew/second-engineer.png" },
+  { id: "chief-officer", name: "1항사", cost: 4, stats: { deck: 4, navigation: 3 }, image: "/images/crew/chief-officer.png" },
+  { id: "first-engineer", name: "1기사", cost: 4, stats: { engine: 6 }, image: "/images/crew/first-engineer.png" },
+  { id: "captain", name: "선장", cost: 5, stats: { deck: 5, navigation: 7 }, image: "/images/crew/captain.png" },
+  { id: "chief-engineer", name: "기관장", cost: 5, stats: { engine: 7 }, image: "/images/crew/chief-engineer.png" },
 ];
 
 export const EVENTS: GameEvent[] = [
@@ -54,7 +57,7 @@ export const EVENTS: GameEvent[] = [
 
 export const COMBOS: Combo[] = [
   { ids: ["deckhand", "boatswain"], skill: "deck", bonus: 2, name: "갑판 찰떡 호흡" },
-  { ids: ["engine-rating", "chief-engineer"], skill: "engine", bonus: 2, name: "기관실 콤비" },
+  { ids: ["engine-rating", "third-engineer"], skill: "engine", bonus: 2, name: "기관실 당직 콤비" },
   { ids: ["third-officer", "second-officer"], skill: "navigation", bonus: 2, name: "항해 당직 팀워크" },
   { ids: ["boatswain", "chief-officer"], skill: "deck", bonus: 2, name: "갑판 지휘 체계" },
 ];
@@ -122,8 +125,8 @@ export function scoreResolution({
 
 export function getTitle(score: number, gameOver = false): string {
   if (gameOver) return "멀미하는 견습생";
-  if (score >= 1300) return "전설의 선기장";
-  if (score >= 1000) return "1항기사";
-  if (score >= 700) return "3항기사";
+  if (score >= 1300) return "전설의 선장";
+  if (score >= 1000) return "1항사";
+  if (score >= 700) return "3항사";
   return "갑판원";
 }

@@ -277,7 +277,7 @@ function ResultScreen({ result, highScore, onRestart, onHome }: { result: Result
     <span className="result-kicker">{result.won ? "목적지 도착!" : "선박 내구도 0"}</span>
     <h1>{result.won ? "당직 생존 성공" : "오늘은 여기까지!"}</h1>
     <p>{result.won ? "열 번의 당직을 무사히 버텨냈어요." : "해남이들이 배를 수리하러 총출동했어요."}</p>
-    <div className="result-character"><img src={result.won ? "/images/crew/master-chief.png" : "/images/crew/engine-rating.png"} alt="결과 해남이 캐릭터" /><span>{result.won ? "최고의 당직이었어!" : "다음엔 꼭 해내자!"}</span></div>
+    <div className="result-character"><img src={result.won ? "/images/crew/captain.png" : "/images/crew/engine-rating.png"} alt="결과 해남이 캐릭터" /><span>{result.won ? "최고의 당직이었어!" : "다음엔 꼭 해내자!"}</span></div>
     <div className="title-medal"><span>획득 칭호</span><strong>{result.title}</strong></div>
     <div className="result-score"><span>최종 점수</span><strong>{result.score.toLocaleString()}</strong>{result.score === highScore && result.score > 0 && <em>BEST!</em>}</div>
     <div className="result-stats"><div><span>남은 내구도</span><strong>{result.hull}</strong></div><div><span>성공 횟수</span><strong>{result.successes}/10</strong></div><div><span>최고 협동</span><strong>{result.bestCombo || 0}</strong></div></div>
@@ -290,7 +290,7 @@ function HelpModal({ onClose }: { onClose: () => void }) {
     <button className="modal-close" onClick={onClose} aria-label="닫기">×</button>
     <span className="modal-kicker">초보 해남이를 위한</span><h2 id="help-title">당직 생존 안내서</h2>
     <ol className="rules-list"><li><b>1</b><span>사건의 요구치만큼 해당 능력치를 모아주세요.</span></li><li><b>2</b><span>매 당직 포인트는 5, 카드는 최대 3장까지!</span></li><li><b>3</b><span>10번을 버티면 승리, 실패하면 내구도 -2예요.</span></li></ol>
-    <div className="combo-guide"><strong>협동 보너스 조합</strong><div><span>갑판원 + 갑판장</span><b>갑판 +2</b></div><div><span>기관원 + 기관장</span><b>기관 +2</b></div><div><span>3항기사 + 2항기사</span><b>항해 +2</b></div><div><span>갑판장 + 1항기사</span><b>갑판 +2</b></div></div>
+    <div className="combo-guide"><strong>협동 보너스 조합</strong><div><span>갑판원 + 갑판장</span><b>갑판 +2</b></div><div><span>기관원 + 3기사</span><b>기관 +2</b></div><div><span>3항사 + 2항사</span><b>항해 +2</b></div><div><span>갑판장 + 1항사</span><b>갑판 +2</b></div></div>
     <p className="bonus-note">요구치와 딱 맞으면 절약 보너스 +50점!</p><button className="primary-button" onClick={onClose}>알겠어요!</button>
   </section></div>;
 }
