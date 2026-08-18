@@ -39,10 +39,11 @@ export const GAME_RULES = {
   dutyPoints: 6,
   maxSelected: 3,
   totalTurns: 10,
-  failureDamage: 2,
+  failureDamage: 3,
   handSize: 4,
-  seniorAppearanceRate: 0.7,
-  cookAppearanceRate: 0.35,
+  viableHandRate: 0.75,
+  seniorAppearanceRate: 0.67,
+  cookAppearanceRate: 0.25,
 } as const;
 
 export const RESULT_TIERS: ResultTier[] = [
@@ -69,18 +70,18 @@ export const CREW_CARDS: CrewCard[] = [
 ];
 
 export const EVENTS: GameEvent[] = [
-  { id: "deck-flood", name: "갑판 침수", skill: "deck", required: 3, description: "큰 파도가 갑판 위로 철썩!", failure: "파도가 갑판을 덮쳤다!" },
-  { id: "cargo-lashing", name: "화물 고박 풀림", skill: "deck", required: 4, description: "화물이 좌우로 덜컹덜컹!", failure: "화물이 위험하게 흔들린다!" },
-  { id: "mooring-line", name: "계류줄 절단", skill: "deck", required: 5, description: "팽팽하던 계류줄이 위험해요.", failure: "계류줄이 끊어졌다!" },
-  { id: "deck-gear", name: "갑판 장비 고장", skill: "deck", required: 4, description: "윈치가 꼼짝도 하지 않아요.", failure: "갑판 장비가 멈췄다!" },
-  { id: "main-engine", name: "주기관 이상", skill: "engine", required: 5, description: "기관실에서 수상한 진동이!", failure: "주기관 출력이 떨어진다!" },
-  { id: "generator", name: "발전기 정지", skill: "engine", required: 4, description: "선내 불빛이 깜빡깜빡해요.", failure: "선내 전원이 흔들린다!" },
-  { id: "fuel-leak", name: "연료 누출", skill: "engine", required: 3, description: "연료 계통 점검이 필요해요.", failure: "기관실에 연료가 새고 있다!" },
-  { id: "coolant", name: "냉각수 경보", skill: "engine", required: 4, description: "온도계 바늘이 쭉쭉 올라가요.", failure: "기관 온도가 빠르게 오른다!" },
-  { id: "fog", name: "짙은 안개", skill: "navigation", required: 3, description: "뱃머리 앞이 뿌옇게 가려졌어요.", failure: "앞이 하나도 보이지 않는다!" },
-  { id: "typhoon", name: "태풍 접근", skill: "navigation", required: 5, description: "먹구름과 높은 파도가 몰려와요.", failure: "거대한 태풍이 항로를 막았다!" },
-  { id: "collision", name: "충돌 위험", skill: "navigation", required: 6, description: "레이더에 빠른 선박이 포착됐어요.", failure: "다른 선박이 빠르게 접근한다!" },
-  { id: "off-course", name: "항로 이탈", skill: "navigation", required: 4, description: "예정 항로에서 점점 멀어져요.", failure: "배가 예정 항로를 벗어났다!" },
+  { id: "deck-flood", name: "갑판 침수", skill: "deck", required: 4, description: "큰 파도가 갑판 위로 철썩!", failure: "파도가 갑판을 덮쳤다!" },
+  { id: "cargo-lashing", name: "화물 고박 풀림", skill: "deck", required: 5, description: "화물이 좌우로 덜컹덜컹!", failure: "화물이 위험하게 흔들린다!" },
+  { id: "mooring-line", name: "계류줄 절단", skill: "deck", required: 6, description: "팽팽하던 계류줄이 위험해요.", failure: "계류줄이 끊어졌다!" },
+  { id: "deck-gear", name: "갑판 장비 고장", skill: "deck", required: 5, description: "윈치가 꼼짝도 하지 않아요.", failure: "갑판 장비가 멈췄다!" },
+  { id: "main-engine", name: "주기관 이상", skill: "engine", required: 6, description: "기관실에서 수상한 진동이!", failure: "주기관 출력이 떨어진다!" },
+  { id: "generator", name: "발전기 정지", skill: "engine", required: 5, description: "선내 불빛이 깜빡깜빡해요.", failure: "선내 전원이 흔들린다!" },
+  { id: "fuel-leak", name: "연료 누출", skill: "engine", required: 4, description: "연료 계통 점검이 필요해요.", failure: "기관실에 연료가 새고 있다!" },
+  { id: "coolant", name: "냉각수 경보", skill: "engine", required: 5, description: "온도계 바늘이 쭉쭉 올라가요.", failure: "기관 온도가 빠르게 오른다!" },
+  { id: "fog", name: "짙은 안개", skill: "navigation", required: 4, description: "뱃머리 앞이 뿌옇게 가려졌어요.", failure: "앞이 하나도 보이지 않는다!" },
+  { id: "typhoon", name: "태풍 접근", skill: "navigation", required: 6, description: "먹구름과 높은 파도가 몰려와요.", failure: "거대한 태풍이 항로를 막았다!" },
+  { id: "collision", name: "충돌 위험", skill: "navigation", required: 7, description: "레이더에 빠른 선박이 포착됐어요.", failure: "다른 선박이 빠르게 접근한다!" },
+  { id: "off-course", name: "항로 이탈", skill: "navigation", required: 5, description: "예정 항로에서 점점 멀어져요.", failure: "배가 예정 항로를 벗어났다!" },
 ];
 
 export const COMBOS: Combo[] = [
@@ -112,13 +113,25 @@ export function drawHandForEvent(
   const available = CREW_CARDS.filter((card) => !resting.has(card.id));
   const seniorId = event.skill === "engine" ? "chief-engineer" : "captain";
   const senior = available.find((card) => card.id === seniorId);
+  const guaranteeViable = random() < GAME_RULES.viableHandRate;
 
-  // Frequently feature the department head when they can solve this event.
-  // A used head still rests for one turn like every other card.
+  // Most hands contain a full solution. The remaining rough hands still
+  // contain event-relevant crew so no department is completely mismatched.
   let guaranteed: CrewCard[] = [];
-  if (senior && (senior.stats[event.skill] ?? 0) >= event.required && random() < GAME_RULES.seniorAppearanceRate) {
-    guaranteed = [senior];
-  } else {
+  let seniorFeatured = false;
+  if (guaranteeViable && senior && random() < GAME_RULES.seniorAppearanceRate) {
+    const helper = available.find(
+      (card) => card.id !== senior.id
+        && card.id !== "cook-chief"
+        && senior.cost + card.cost <= GAME_RULES.dutyPoints
+        && evaluateDuty([senior.id, card.id], event).success,
+    );
+    if (evaluateDuty([senior.id], event).success || helper) {
+      guaranteed = helper ? [senior, helper] : [senior];
+      seniorFeatured = true;
+    }
+  }
+  if (guaranteeViable && guaranteed.length === 0) {
     const viable: CrewCard[][] = [];
     const search = (start: number, picked: CrewCard[]) => {
       if (picked.length > 0) {
@@ -130,6 +143,7 @@ export function drawHandForEvent(
       if (picked.length === GAME_RULES.maxSelected) return;
       for (let index = start; index < available.length; index += 1) {
         const next = available[index];
+        if (next.id === "cook-chief" || next.id === seniorId) continue;
         const nextCost = picked.reduce((sum, card) => sum + card.cost, 0) + next.cost;
         if (nextCost <= GAME_RULES.dutyPoints) search(index + 1, [...picked, next]);
       }
@@ -139,11 +153,16 @@ export function drawHandForEvent(
   }
 
   if (guaranteed.length === 0) {
-    const matching = available.filter((card) => (card.stats[event.skill] ?? 0) > 0);
-    guaranteed = shuffle(matching, random).slice(0, Math.min(2, matching.length));
+    const matching = available
+      .filter((card) => card.id !== senior?.id && (card.stats[event.skill] ?? 0) > 0)
+      .sort((left, right) => (left.stats[event.skill] ?? 0) - (right.stats[event.skill] ?? 0));
+    guaranteed = guaranteeViable
+      ? shuffle(matching, random).slice(0, Math.min(2, matching.length))
+      : matching.slice(0, 1);
   }
 
   const cook = available.find((card) => card.id === "cook-chief");
+  let cookFeatured = false;
   if (
     cook
     && guaranteed.length < GAME_RULES.handSize
@@ -151,11 +170,38 @@ export function drawHandForEvent(
     && random() < GAME_RULES.cookAppearanceRate
   ) {
     guaranteed.push(cook);
+    cookFeatured = true;
   }
 
   const guaranteedIds = new Set(guaranteed.map((card) => card.id));
-  const remainder = shuffle(available.filter((card) => !guaranteedIds.has(card.id)), random);
+  const candidates = available.filter(
+    (card) => !guaranteedIds.has(card.id)
+      && (card.id !== cook?.id || cookFeatured)
+      && (card.id !== senior?.id || seniorFeatured),
+  );
+  const preferred = guaranteeViable
+    ? candidates
+    : candidates.filter((card) => (card.stats[event.skill] ?? 0) === 0);
+  const preferredIds = new Set(preferred.map((card) => card.id));
+  const overflow = candidates.filter((card) => !preferredIds.has(card.id));
+  const remainder = [...shuffle(preferred, random), ...shuffle(overflow, random)];
   return [...guaranteed, ...remainder].slice(0, GAME_RULES.handSize).map((card) => card.id);
+}
+
+export function canRespondWithHand(handIds: readonly string[], event: GameEvent): boolean {
+  const cards = CREW_CARDS.filter((card) => handIds.includes(card.id));
+  const search = (start: number, picked: CrewCard[], cost: number): boolean => {
+    if (picked.length > 0 && evaluateDuty(picked.map((card) => card.id), event).success) return true;
+    if (picked.length === GAME_RULES.maxSelected) return false;
+    for (let index = start; index < cards.length; index += 1) {
+      const next = cards[index];
+      if (cost + next.cost <= GAME_RULES.dutyPoints && search(index + 1, [...picked, next], cost + next.cost)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  return search(0, [], 0);
 }
 
 export function calculateResponse(

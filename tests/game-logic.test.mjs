@@ -5,6 +5,7 @@ import {
   CREW_CARDS,
   EVENTS,
   GAME_RULES,
+  canRespondWithHand,
   calculateResponse,
   drawHandForEvent,
   drawNextEvent,
@@ -44,8 +45,15 @@ test("navigation hand never becomes engine-only when captain is resting", () => 
   assert.ok(event);
   const hand = drawHandForEvent(event, ["captain"], () => 0.8);
   assert.ok(!hand.includes("captain"));
-  assert.equal(evaluateDuty(hand, event).success, true);
   assert.ok(hand.some((id) => (CREW_CARDS.find((card) => card.id === id)?.stats.navigation ?? 0) > 0));
+});
+
+test("rough hands keep the right department but may require taking damage", () => {
+  const collision = EVENTS.find((event) => event.id === "collision");
+  assert.ok(collision);
+  const hand = drawHandForEvent(collision, [], () => 0.9);
+  assert.ok(hand.some((id) => (CREW_CARDS.find((card) => card.id === id)?.stats.navigation ?? 0) > 0));
+  assert.equal(canRespondWithHand(hand, collision), false);
 });
 
 test("department heads appear frequently and still rest after use", () => {
@@ -120,10 +128,17 @@ test("exact success with combo scores all bonuses once", () => {
   assert.equal(scoreResolution({ success: false, total: 3, required: 5, comboCount: 0 }), 0);
 });
 
-test("easier rules keep every requirement within the turn budget", () => {
+test("normal difficulty increases pressure without changing the score system", () => {
   assert.equal(GAME_RULES.startingHull, 12);
   assert.equal(GAME_RULES.dutyPoints, 6);
-  assert.ok(Math.max(...EVENTS.map((event) => event.required)) <= GAME_RULES.dutyPoints);
+  assert.equal(GAME_RULES.failureDamage, 3);
+  assert.equal(GAME_RULES.viableHandRate, 0.75);
+  assert.equal(GAME_RULES.seniorAppearanceRate, 0.67);
+  assert.equal(GAME_RULES.cookAppearanceRate, 0.25);
+  assert.deepEqual(
+    [Math.min(...EVENTS.map((event) => event.required)), Math.max(...EVENTS.map((event) => event.required))],
+    [4, 7],
+  );
 });
 
 test("titles follow success-count thresholds with distinct illustrations", () => {
@@ -154,7 +169,8 @@ test("nickname validation accepts friendly names and rejects unsafe input", () =
 
 test("leaderboard rejects scores outside possible game bounds", () => {
   assert.deepEqual(scoreBounds(0), { min: 0, max: 0 });
-  assert.deepEqual(scoreBounds(5), { min: 600, max: 1000 });
+  assert.deepEqual(scoreBounds(5), { min: 500, max: 900 });
+  assert.deepEqual(scoreBounds(7), { min: 850, max: 1410 });
   assert.deepEqual(scoreBounds(10), { min: 1600, max: 2400 });
   assert.equal(validateLeaderboardSubmission({ nickname: "부산해적왕", clientId: "12345678-1234-1234-1234-123456789012", score: 1600, successes: 10 }).ok, true);
   assert.equal(validateLeaderboardSubmission({ nickname: "부산해적왕", clientId: "12345678-1234-1234-1234-123456789012", score: 9999, successes: 10 }).ok, false);

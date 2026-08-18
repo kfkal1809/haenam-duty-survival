@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   CREW_CARDS,
   GAME_RULES,
+  canRespondWithHand,
   drawHandForEvent,
   drawNextEvent,
   evaluateDuty,
@@ -303,6 +304,7 @@ function StartScreen({ highScore, highTitle, nickname, nicknameError, ready, sou
 
 function GameScreen({ game, spent, selectedCards, total, ready, comboNames, supportActive, notice, soundOn, outcome, onSound, onToggleCard, onResolve, onContinue }: { game: GameState; spent: number; selectedCards: CrewCard[]; total: number; ready: boolean; comboNames: string[]; supportActive: boolean; notice: string; soundOn: boolean; outcome: Outcome | null; onSound: () => void; onToggleCard: (card: CrewCard) => void; onResolve: () => void; onContinue: () => void }) {
   const meta = EVENT_META[game.event.skill];
+  const handViable = canRespondWithHand(game.hand, game.event);
   return (
     <div className="game-screen screen-panel">
       <header className="game-header">
@@ -325,7 +327,7 @@ function GameScreen({ game, spent, selectedCards, total, ready, comboNames, supp
         {(comboNames.length > 0 || supportActive) && <div className="combo-ribbon">✦ {[...comboNames, ...(supportActive ? ["조리장 응원 ×1.5"] : [])].join(" · ")} 발동!</div>}
       </section>
       <section className="hand-section">
-        <div className="hand-heading"><strong>손패 <em>사건 맞춤</em></strong><span>당직 포인트 <b>{GAME_RULES.dutyPoints - spent}</b>/{GAME_RULES.dutyPoints}</span></div>
+        <div className="hand-heading"><strong>손패 <em className={handViable ? "" : "rough"}>{handViable ? "사건 맞춤" : "거친 당직"}</em></strong><span>당직 포인트 <b>{GAME_RULES.dutyPoints - spent}</b>/{GAME_RULES.dutyPoints}</span></div>
         <div className="hand-grid">
           {game.hand.map((id) => {
             const card = CREW_CARDS.find((item) => item.id === id)!;
@@ -335,7 +337,7 @@ function GameScreen({ game, spent, selectedCards, total, ready, comboNames, supp
         </div>
       </section>
       <div className="action-area">
-        <p className="notice">{notice || `${meta.label} 수치만 합산돼요 · 카드 아래 기여도를 확인하세요`}</p>
+        <p className="notice">{notice || (handViable ? `${meta.label} 수치만 합산돼요 · 카드 아래 기여도를 확인하세요` : "거친 당직! 요구치를 못 채워도 최선의 카드를 골라보세요")}</p>
         <button className="primary-button respond-button" onClick={onResolve} disabled={Boolean(outcome)}>대응하기 <span>›</span></button>
       </div>
       {outcome && <div className={`outcome-layer ${outcome.success ? "success" : "failure"}`}><div className="outcome-card">
@@ -390,7 +392,7 @@ function HelpModal({ onClose }: { onClose: () => void }) {
   return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}><section className="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title" onMouseDown={(event) => event.stopPropagation()}>
     <button className="modal-close" onClick={onClose} aria-label="닫기">×</button>
     <span className="modal-kicker">초보 해남이를 위한</span><h2 id="help-title">당직 생존 안내서</h2>
-    <ol className="rules-list"><li><b>1</b><span>갑판 사건은 갑판, 기관 사건은 기관, 항해 사건은 항해 수치만 합산해요.</span></li><li><b>2</b><span>매 당직 포인트는 {GAME_RULES.dutyPoints}, 카드는 최대 {GAME_RULES.maxSelected}장까지!</span></li><li><b>3</b><span>{GAME_RULES.totalTurns}번을 버티면 승리, 실패하면 내구도 -{GAME_RULES.failureDamage}예요.</span></li></ol>
+    <ol className="rules-list"><li><b>1</b><span>갑판 사건은 갑판, 기관 사건은 기관, 항해 사건은 항해 수치만 합산해요.</span></li><li><b>2</b><span>매 당직 포인트는 {GAME_RULES.dutyPoints}, 카드는 최대 {GAME_RULES.maxSelected}장까지!</span></li><li><b>3</b><span>{GAME_RULES.totalTurns}번을 버티면 승리, 실패하면 내구도 -{GAME_RULES.failureDamage}예요.</span></li><li><b>4</b><span>관련 직급은 항상 나오지만, 거친 당직에는 요구치를 한 번에 채울 조합이 없을 수도 있어요.</span></li></ol>
     <div className="combo-guide"><strong>협동·지원 보너스</strong><div><span>갑판원 + 1항사</span><b>갑판 +2</b></div><div><span>기관원 + 3기사</span><b>기관 +2</b></div><div><span>3항사 + 2항사</span><b>항해 +2</b></div><div><span>조리장 + 다른 해남이</span><b>대응력 ×1.5</b></div></div>
     <div className="title-guide"><strong>생존 칭호 · 성공 횟수 기준</strong><div><span>멀미하는 실습생</span><b>0~1회</b></div><div><span>구명조끼 꽉 맨 갑판 병아리</span><b>2~3회</b></div><div><span>커피로 버티는 당직 요정</span><b>4~5회</b></div><div><span>파도와 밀당하는 바다 해결사</span><b>6~7회</b></div><div><span>선장님도 찾는 만능 해남이</span><b>8~9회</b></div><div><span>갈매기도 경례하는 전설의 해남이</span><b>10회</b></div><p>각 칭호마다 결과 캐릭터도 달라져요.</p></div>
     <p className="bonus-note">조리장은 다른 카드의 이번 사건 대응력을 1.5배로 올리고, 소수점은 올림해요. 요구치와 딱 맞으면 절약 보너스 +50점!</p><button className="primary-button" onClick={onClose}>알겠어요!</button>

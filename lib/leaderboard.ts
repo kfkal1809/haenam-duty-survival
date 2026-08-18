@@ -32,8 +32,9 @@ export function validateNickname(value: string): string | null {
 }
 
 export function scoreBounds(successes: number) {
-  if (successes >= 5) {
-    const hullBonus = (GAME_RULES.startingHull - (GAME_RULES.totalTurns - successes) * GAME_RULES.failureDamage) * 50;
+  const remainingHull = GAME_RULES.startingHull - (GAME_RULES.totalTurns - successes) * GAME_RULES.failureDamage;
+  if (remainingHull > 0) {
+    const hullBonus = remainingHull * 50;
     return { min: successes * 100 + hullBonus, max: successes * 180 + hullBonus };
   }
   return { min: successes * 100, max: successes * 180 };
